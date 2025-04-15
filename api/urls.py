@@ -10,7 +10,7 @@ router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
 
 urlpatterns = [
-    # API routes for the users
+    
     path('', include(router.urls)),  # UserViewSet endpoints
 
     # JWT token generation and refreshing routes
