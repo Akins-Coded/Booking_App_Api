@@ -2,7 +2,9 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from .permissions import IsAdminOrManager, IsAdmin, IsAdminOrSelf
 from django.contrib.auth import get_user_model
+from booking.models import Organisation, Hub, Workspace, Booking
 
 from .serializers import (
     AdminUserSerializer,
@@ -13,7 +15,7 @@ from .serializers import (
     UserUpdateSerializer,
     ChangePasswordSerializer,
 )
-from .permissions import IsAdmin, IsAdminOrSelf
+
 
 User = get_user_model()
 
@@ -72,3 +74,46 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response({'detail': 'Password changed successfully'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Booking Views
+
+
+
+
+from .serializers import (
+    OrganisationSerializer,
+    HubSerializer,
+    WorkspaceSerializer,
+    BookingSerializer
+)
+
+class OrganisationViewSet(viewsets.ModelViewSet):
+    queryset = Organisation.objects.all()
+    serializer_class = OrganisationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        # Automatically assign owner to the authenticated user
+        serializer.save(owner=self.request.user)
+
+
+class HubViewSet(viewsets.ModelViewSet):
+    queryset = Hub.objects.all()
+    serializer_class = HubSerializer
+    permission_classes = [IsAuthenticated, IsAdminOrManager]
+
+class WorkspaceViewSet(viewsets.ModelViewSet):
+    queryset = Workspace.objects.all()
+    serializer_class = WorkspaceSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class BookingViewSet(viewsets.ModelViewSet):
+    queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        # Automatically assign booking to current user
+        serializer.save(user=self.request.user)

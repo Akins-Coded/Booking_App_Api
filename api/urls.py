@@ -4,10 +4,15 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView
 )
-from .views import UserViewSet
+from .views import UserViewSet, OrganisationViewSet, HubViewSet, WorkspaceViewSet, BookingViewSet
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
+router.register(r'organisations', OrganisationViewSet)
+router.register(r'hubs', HubViewSet)
+router.register(r'workspaces', WorkspaceViewSet)
+router.register(r'bookings', BookingViewSet)
+
 
 urlpatterns = [
     

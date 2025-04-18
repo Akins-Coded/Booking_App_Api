@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
-
+from booking.models import Organisation, Hub, Workspace, Booking
 User = get_user_model()
 
 
@@ -66,3 +66,63 @@ class ChangePasswordSerializer(serializers.Serializer):
         user.set_password(self.validated_data['new_password'])
         user.save()
         return user
+
+# booking\serializers.py
+
+class OrganisationSerializer(serializers.ModelSerializer):
+    owner = serializers.StringRelatedField(read_only=True)
+    
+    class Meta:
+        model = Organisation
+        fields = ['id', 'name', 'owner', 'created_at', 'updated_at']
+
+
+class HubSerializer(serializers.ModelSerializer):
+    organisation = OrganisationSerializer(read_only=True)
+    organisation_id = serializers.PrimaryKeyRelatedField(
+        queryset=Organisation.objects.all(),
+        source='organisation',
+        write_only=True
+    )
+
+    class Meta:
+        model = Hub
+        fields = ['id', 'name', 'organisation', 'organisation_id', 'created_at', 'updated_at']
+
+
+class WorkspaceSerializer(serializers.ModelSerializer):
+    hub = HubSerializer(read_only=True)
+    hub_id = serializers.PrimaryKeyRelatedField(
+        queryset=Hub.objects.all(),
+        source='hub',
+        write_only=True
+    )
+
+    class Meta:
+        model = Workspace
+        fields = ['id', 'hub', 'hub_id', 'type', 'status', 'created_at', 'updated_at']
+
+
+class BookingSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField(read_only=True)
+    user_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        source='user',
+        write_only=True
+    )
+    workspace = WorkspaceSerializer(read_only=True)
+    workspace_id = serializers.PrimaryKeyRelatedField(
+        queryset=Workspace.objects.all(),
+        source='workspace',
+        write_only=True
+    )
+
+    class Meta:
+        model = Booking
+        fields = [
+            'id',
+            'user', 'user_id',
+            'workspace', 'workspace_id',
+            'start_time', 'end_time', 'status',
+            'created_at', 'updated_at'
+        ]
