@@ -19,7 +19,7 @@ A role-based workspace booking system built with Django Rest Framework, designed
 - **Python 3.11+**
 - **Django 5+**
 - **Django REST Framework**
-- **PostgreSQL**
+- **SQLite**
 - **JWT Authentication**
 
 ---
